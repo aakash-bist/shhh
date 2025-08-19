@@ -1,26 +1,48 @@
 import { useState, useEffect } from 'react';
-import { storageUtils } from '../utils/storage';
+import { 
+  ref, 
+  push, 
+  get, 
+  query, 
+  orderByChild, 
+  onValue,
+  remove,
+  serverTimestamp 
+} from 'firebase/database';
+import { db } from '../firebase';
 
 export const useMessages = () => {
   const [messages, setMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Load messages from localStorage on component mount
+  // Load messages from Realtime Database on component mount
   useEffect(() => {
-    const loadMessages = () => {
-      try {
-        const storedMessages = storageUtils.loadMessages();
-        setMessages(storedMessages);
-      } catch (error) {
-        console.error('Error loading messages:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
+    const messagesRef = ref(db, 'messages');
+    const q = query(messagesRef, orderByChild('timestamp'));
 
-    // Simulate loading delay for better UX
-    setTimeout(loadMessages, 500);
+    // Set up real-time listener
+    const unsubscribe = onValue(q, (snapshot) => {
+      const messagesData = [];
+      if (snapshot.exists()) {
+        snapshot.forEach((childSnapshot) => {
+          messagesData.push({
+            id: childSnapshot.key,
+            ...childSnapshot.val()
+          });
+        });
+        // Sort by timestamp (newest first)
+        messagesData.sort((a, b) => b.timestamp - a.timestamp);
+      }
+      setMessages(messagesData);
+      setIsLoading(false);
+    }, (error) => {
+      console.error('Error loading messages:', error);
+      setIsLoading(false);
+    });
+
+    // Cleanup subscription on unmount
+    return () => unsubscribe();
   }, []);
 
   const publishMessage = async (text) => {
@@ -30,20 +52,15 @@ export const useMessages = () => {
     try {
       // Create new message object
       const newMessage = {
-        id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
         text: text.trim(),
-        timestamp: new Date()
+        timestamp: Date.now() // Use current timestamp for RTDB
       };
 
-      // Add to local state
-      const updatedMessages = [newMessage, ...messages];
-      setMessages(updatedMessages);
-
-      // Save to localStorage
-      storageUtils.saveMessages(updatedMessages);
-
-      // Simulate network delay for realistic feel
-      await new Promise(resolve => setTimeout(resolve, 300));
+      // Add to Realtime Database
+      const messagesRef = ref(db, 'messages');
+      const newMessageRef = await push(messagesRef, newMessage);
+      console.log('Message published with ID:', newMessageRef.key);
+      
     } catch (error) {
       console.error('Error publishing message:', error);
       alert('Failed to publish message. Please try again.');
@@ -53,10 +70,17 @@ export const useMessages = () => {
   };
 
   // Function to clear all messages (useful for testing)
-  const clearAllMessages = () => {
+  const clearAllMessages = async () => {
     if (window.confirm('Are you sure you want to clear all messages? This cannot be undone.')) {
-      storageUtils.clearMessages();
-      setMessages([]);
+      try {
+        // Delete all messages from Realtime Database
+        const messagesRef = ref(db, 'messages');
+        await remove(messagesRef);
+        console.log('All messages cleared');
+      } catch (error) {
+        console.error('Error clearing messages:', error);
+        alert('Failed to clear messages. Please try again.');
+      }
     }
   };
 
