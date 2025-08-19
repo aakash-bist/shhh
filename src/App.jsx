@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import MessageInput from './components/MessageInput';
-import MessageWall from './components/MessageWall';
-import DebugPanel from './components/DebugPanel';
-import { useMessages } from './hooks/useMessages';
+import MessageInput from './components/MessageInput.jsx';
+import MessageWall from './components/MessageWall.jsx';
+import DebugPanel from './components/DebugPanel.jsx';
+import { useMessages } from './hooks/useMessages.js';
 
 function App() {
   const { messages, isLoading, isSubmitting, publishMessage, clearAllMessages } = useMessages();

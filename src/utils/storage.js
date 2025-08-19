@@ -1,6 +1,6 @@
 // Storage utility functions - can be easily replaced with Firebase later
 
-const STORAGE_KEY = 'bhadas-messages';
+const STORAGE_KEY = 'shhh-messages';
 
 export const storageUtils = {
   // Save messages to localStorage
