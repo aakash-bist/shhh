@@ -71,12 +71,11 @@ const DebugPanel = ({ onClearMessages }) => {
         <button
           onClick={() => {
             const data = storageUtils.loadMessages();
-            console.log('Messages in localStorage:', data);
-            alert(`Logged ${data.length} messages to console`);
+            alert(`Found ${data.length} messages in localStorage`);
           }}
           className="w-full bg-blue-500/20 hover:bg-blue-500/30 text-blue-200 text-xs py-2 px-3 rounded-lg transition-colors border border-blue-500/30"
         >
-          📋 Log to Console
+          📋 Show Message Count
         </button>
       </div>
       

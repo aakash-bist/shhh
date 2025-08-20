@@ -1,8 +1,21 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 
 const MessageInput = ({ onPublish, isSubmitting }) => {
   const [message, setMessage] = useState('');
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    // Detect mobile devices
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -18,7 +31,7 @@ const MessageInput = ({ onPublish, isSubmitting }) => {
     <motion.div
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6 }}
+      transition={{ duration: isMobile ? 0.3 : 0.6 }}
       className="w-full"
     >
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -39,8 +52,8 @@ const MessageInput = ({ onPublish, isSubmitting }) => {
         <motion.button
           type="submit"
           disabled={!message.trim() || message.length > 280 || isSubmitting}
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
+          whileHover={!isMobile ? { scale: 1.02 } : {}}
+          whileTap={!isMobile ? { scale: 0.98 } : {}}
           className={`w-full py-3 px-6 rounded-xl font-semibold text-white shadow-lg transition-all duration-300 ${
             !message.trim() || message.length > 280 || isSubmitting
               ? 'bg-gray-400 cursor-not-allowed'
@@ -48,11 +61,15 @@ const MessageInput = ({ onPublish, isSubmitting }) => {
           }`}
         >
           {isSubmitting ? (
-            <motion.div
-              animate={{ rotate: 360 }}
-              transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-              className="w-5 h-5 border-2 border-white border-t-transparent rounded-full mx-auto"
-            />
+            isMobile ? (
+              <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full mx-auto animate-spin" />
+            ) : (
+              <motion.div
+                animate={{ rotate: 360 }}
+                transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                className="w-5 h-5 border-2 border-white border-t-transparent rounded-full mx-auto"
+              />
+            )
           ) : (
             'Publish Anonymously ✨'
           )}

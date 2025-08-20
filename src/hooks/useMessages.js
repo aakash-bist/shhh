@@ -37,7 +37,6 @@ export const useMessages = () => {
       setMessages(messagesData);
       setIsLoading(false);
     }, (error) => {
-      console.error('Error loading messages:', error);
       setIsLoading(false);
     });
 
@@ -59,10 +58,8 @@ export const useMessages = () => {
       // Add to Realtime Database
       const messagesRef = ref(db, 'messages');
       const newMessageRef = await push(messagesRef, newMessage);
-      console.log('Message published with ID:', newMessageRef.key);
       
     } catch (error) {
-      console.error('Error publishing message:', error);
       alert('Failed to publish message. Please try again.');
     } finally {
       setIsSubmitting(false);
@@ -76,9 +73,7 @@ export const useMessages = () => {
         // Delete all messages from Realtime Database
         const messagesRef = ref(db, 'messages');
         await remove(messagesRef);
-        console.log('All messages cleared');
       } catch (error) {
-        console.error('Error clearing messages:', error);
         alert('Failed to clear messages. Please try again.');
       }
     }

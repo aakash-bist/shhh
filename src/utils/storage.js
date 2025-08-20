@@ -9,7 +9,6 @@ export const storageUtils = {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(messages));
       return true;
     } catch (error) {
-      console.error('Error saving to localStorage:', error);
       return false;
     }
   },
@@ -28,7 +27,6 @@ export const storageUtils = {
       }
       return [];
     } catch (error) {
-      console.error('Error loading from localStorage:', error);
       return [];
     }
   },
@@ -39,7 +37,6 @@ export const storageUtils = {
       localStorage.removeItem(STORAGE_KEY);
       return true;
     } catch (error) {
-      console.error('Error clearing localStorage:', error);
       return false;
     }
   },

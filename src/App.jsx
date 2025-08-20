@@ -1,35 +1,49 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import MessageInput from './components/MessageInput.jsx';
-import MessageWall from './components/MessageWall.jsx';
-import DebugPanel from './components/DebugPanel.jsx';
-import { useMessages } from './hooks/useMessages.js';
+import MessageInput from './components/MessageInput';
+import MessageWall from './components/MessageWall';
+import DebugPanel from './components/DebugPanel';
+import { useMessages } from './hooks/useMessages';
+
 
 function App() {
-  const { messages, isLoading, isSubmitting, publishMessage, clearAllMessages } = useMessages();
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [showDebugPanel, setShowDebugPanel] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  const { messages, publishMessage, clearAllMessages, isLoading, isSubmitting } = useMessages();
 
-  const handlePublish = (text) => {
-    publishMessage(text);
-    setIsDrawerOpen(false);
+  useEffect(() => {
+    // Detect mobile devices
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  const handlePublish = async (messageText) => {
+    try {
+      await publishMessage(messageText);
+    } catch (error) {
+      // Error handled by publishMessage function
+    }
+  };
+
+  const handleClearAll = async () => {
+    try {
+      await clearAllMessages();
+    } catch (error) {
+      // Error handled by clearAllMessages function
+    }
   };
 
   return (
-    <div className="min-h-screen relative overflow-hidden bg-black">
-      {/* Futuristic Dynamic Background */}
-      <div className="fixed inset-0 z-0">
-        {/* Cyber grid pattern */}
-        <div className="absolute inset-0 opacity-20">
-          <div className="absolute inset-0" style={{
-            backgroundImage: `
-              linear-gradient(rgba(148, 163, 184, 0.1) 1px, transparent 1px),
-              linear-gradient(90deg, rgba(148, 163, 184, 0.1) 1px, transparent 1px)
-            `,
-            backgroundSize: '50px 50px'
-          }} />
-        </div>
-
-        {/* Primary animated gradient - soft tones */}
+    <div className="min-h-screen relative overflow-x-hidden">
+      {/* Enhanced futuristic background */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden">
+        {/* Dynamic gradient background */}
         <motion.div
           animate={{
             background: [
@@ -47,93 +61,97 @@ function App() {
           className="absolute inset-0 opacity-40"
         />
         
-        {/* Soft floating orbs */}
-        <motion.div
-          animate={{
-            x: [0, 100, 0],
-            y: [0, -50, 0],
-            scale: [1, 1.2, 1],
-            opacity: [0.2, 0.4, 0.2]
-          }}
-          transition={{
-            duration: 25,
-            repeat: Infinity,
-            ease: "easeInOut"
-          }}
-          className="absolute top-20 left-10 w-96 h-96 rounded-full"
-          style={{
-            background: 'radial-gradient(circle, rgba(148, 163, 184, 0.2) 0%, transparent 70%)',
-            boxShadow: '0 0 100px rgba(148, 163, 184, 0.3), inset 0 0 50px rgba(148, 163, 184, 0.1)'
-          }}
-        />
-        
-        <motion.div
-          animate={{
-            x: [0, -80, 0],
-            y: [0, 60, 0],
-            scale: [1, 1.1, 1],
-            opacity: [0.15, 0.35, 0.15]
-          }}
-          transition={{
-            duration: 30,
-            repeat: Infinity,
-            ease: "easeInOut",
-            delay: 5
-          }}
-          className="absolute top-40 right-20 w-80 h-80 rounded-full"
-          style={{
-            background: 'radial-gradient(circle, rgba(100, 116, 139, 0.2) 0%, transparent 70%)',
-            boxShadow: '0 0 100px rgba(100, 116, 139, 0.3), inset 0 0 50px rgba(100, 116, 139, 0.1)'
-          }}
-        />
-        
-        <motion.div
-          animate={{
-            x: [0, 60, 0],
-            y: [0, -40, 0],
-            scale: [1, 1.3, 1],
-            opacity: [0.2, 0.4, 0.2]
-          }}
-          transition={{
-            duration: 35,
-            repeat: Infinity,
-            ease: "easeInOut",
-            delay: 10
-          }}
-          className="absolute bottom-40 left-1/4 w-72 h-72 rounded-full"
-          style={{
-            background: 'radial-gradient(circle, rgba(71, 85, 105, 0.2) 0%, transparent 70%)',
-            boxShadow: '0 0 100px rgba(71, 85, 105, 0.3), inset 0 0 50px rgba(71, 85, 105, 0.1)'
-          }}
-        />
-        
-        {/* Floating soft particles */}
-        {[...Array(12)].map((_, i) => (
-          <motion.div
-            key={i}
-            animate={{
-              y: [0, -40, 0],
-              x: [0, Math.sin(i) * 30, 0],
-              opacity: [0.1, 0.3, 0.1],
-              scale: [0.3, 1, 0.3]
-            }}
-            transition={{
-              duration: 15 + i * 3,
-              repeat: Infinity,
-              ease: "easeInOut",
-              delay: i * 2
-            }}
-            className="absolute rounded-full"
-            style={{
-              width: `${2 + (i % 3)}px`,
-              height: `${2 + (i % 3)}px`,
-              background: `rgba(${i % 3 === 0 ? '148, 163, 184' : i % 3 === 1 ? '100, 116, 139' : '71, 85, 105'}, 0.6)`,
-              boxShadow: `0 0 ${10 + i * 2}px rgba(${i % 3 === 0 ? '148, 163, 184' : i % 3 === 1 ? '100, 116, 139' : '71, 85, 105'}, 0.4)`,
-              left: `${15 + i * 8}%`,
-              top: `${25 + i * 6}%`
-            }}
-          />
-        ))}
+        {/* Soft floating orbs - only on desktop */}
+        {!isMobile && (
+          <>
+            <motion.div
+              animate={{
+                x: [0, 100, 0],
+                y: [0, -50, 0],
+                scale: [1, 1.2, 1],
+                opacity: [0.2, 0.4, 0.2]
+              }}
+              transition={{
+                duration: 25,
+                repeat: Infinity,
+                ease: "easeInOut"
+              }}
+              className="absolute top-20 left-10 w-96 h-96 rounded-full"
+              style={{
+                background: 'radial-gradient(circle, rgba(148, 163, 184, 0.2) 0%, transparent 70%)',
+                boxShadow: '0 0 100px rgba(148, 163, 184, 0.3), inset 0 0 50px rgba(148, 163, 184, 0.1)'
+              }}
+            />
+            
+            <motion.div
+              animate={{
+                x: [0, -80, 0],
+                y: [0, 60, 0],
+                scale: [1, 1.1, 1],
+                opacity: [0.15, 0.35, 0.15]
+              }}
+              transition={{
+                duration: 30,
+                repeat: Infinity,
+                ease: "easeInOut",
+                delay: 5
+              }}
+              className="absolute top-40 right-20 w-80 h-80 rounded-full"
+              style={{
+                background: 'radial-gradient(circle, rgba(100, 116, 139, 0.2) 0%, transparent 70%)',
+                boxShadow: '0 0 100px rgba(100, 116, 139, 0.3), inset 0 0 50px rgba(100, 116, 139, 0.1)'
+              }}
+            />
+            
+            <motion.div
+              animate={{
+                x: [0, 60, 0],
+                y: [0, -40, 0],
+                scale: [1, 1.3, 1],
+                opacity: [0.2, 0.4, 0.2]
+              }}
+              transition={{
+                duration: 35,
+                repeat: Infinity,
+                ease: "easeInOut",
+                delay: 10
+              }}
+              className="absolute bottom-40 left-1/4 w-72 h-72 rounded-full"
+              style={{
+                background: 'radial-gradient(circle, rgba(71, 85, 105, 0.2) 0%, transparent 70%)',
+                boxShadow: '0 0 100px rgba(71, 85, 105, 0.3), inset 0 0 50px rgba(71, 85, 105, 0.1)'
+              }}
+            />
+            
+            {/* Floating soft particles - only on desktop */}
+            {[...Array(12)].map((_, i) => (
+              <motion.div
+                key={i}
+                animate={{
+                  y: [0, -40, 0],
+                  x: [0, Math.sin(i) * 30, 0],
+                  opacity: [0.1, 0.3, 0.1],
+                  scale: [0.3, 1, 0.3]
+                }}
+                transition={{
+                  duration: 15 + i * 3,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                  delay: i * 2
+                }}
+                className="absolute rounded-full"
+                style={{
+                  width: `${2 + (i % 3)}px`,
+                  height: `${2 + (i % 3)}px`,
+                  background: `rgba(${i % 3 === 0 ? '148, 163, 184' : i % 3 === 1 ? '100, 116, 139' : '71, 85, 105'}, 0.6)`,
+                  boxShadow: `0 0 ${10 + i * 2}px rgba(${i % 3 === 0 ? '148, 163, 184' : i % 3 === 1 ? '100, 116, 139' : '71, 85, 105'}, 0.4)`,
+                  left: `${15 + i * 8}%`,
+                  top: `${25 + i * 6}%`
+                }}
+              />
+            ))}
+          </>
+        )}
         
         {/* Subtle scanning line effect */}
         <motion.div
@@ -206,16 +224,16 @@ function App() {
       {/* Content Layer */}
       <div className="relative z-10">
       {/* Debug Panel */}
-      <DebugPanel onClearMessages={clearAllMessages} />
+      {/* <DebugPanel onClearMessages={handleClearAll} /> */}
       
         {/* Message Wall */}
-        <main className="pt-20 pb-32">
+        <main className="pt-8 pb-32">
           <MessageWall messages={messages} isLoading={isLoading} />
         </main>
 
         {/* Floating Confess Button */}
         <motion.button
-          onClick={() => setIsDrawerOpen(true)}
+          onClick={() => setShowDebugPanel(true)}
           className="fixed bottom-6 right-6 z-40 w-16 h-16 rounded-full shadow-lg flex items-center justify-center text-2xl font-semibold transition-all duration-300"
           style={{
             background: 'linear-gradient(135deg, #64748b, #475569)',
@@ -231,20 +249,18 @@ function App() {
           ✨
         </motion.button>
 
-        {/* Confession Input Drawer */}
+                {/* Confession Input Drawer */}
         <AnimatePresence>
-          {isDrawerOpen && (
+          {showDebugPanel && (
             <>
-              {/* Backdrop */}
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                onClick={() => setIsDrawerOpen(false)}
+                onClick={() => setShowDebugPanel(false)}
                 className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40"
               />
               
-              {/* Drawer */}
               <motion.div
                 initial={{ opacity: 0, scale: 0.9, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -261,14 +277,13 @@ function App() {
                   boxShadow: '0 20px 60px rgba(71, 85, 105, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.8)'
                 }}
               >
-                {/* Header */}
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-lg font-semibold text-slate-700">Share Your Confession</h3>
                   <button
-                    onClick={() => setIsDrawerOpen(false)}
+                    onClick={() => setShowDebugPanel(false)}
                     className="w-8 h-8 rounded-full flex items-center justify-center text-slate-500 hover:text-slate-700 transition-colors"
                     style={{
-                      background: 'rgba(71, 85, 105, 0.1)',
+                      background: 'rgba(71, 85, 105, 0.2)',
                       border: '1px solid rgba(71, 85, 105, 0.2)'
                     }}
                   >
@@ -276,38 +291,11 @@ function App() {
                   </button>
                 </div>
                 
-                {/* Textarea */}
-                <textarea
-                  placeholder="Share your thoughts, confessions, poetry, or anything on your mind..."
-                  className="w-full h-28 p-4 rounded-xl resize-none border-0 focus:ring-2 focus:ring-slate-300 focus:outline-none text-slate-800 placeholder-slate-500"
-                  style={{
-                    background: 'rgba(71, 85, 105, 0.1)',
-                    border: '1px solid rgba(71, 85, 105, 0.2)',
-                    boxShadow: 'inset 0 2px 4px rgba(0, 0, 0, 0.05)'
-                  }}
+                {/* Message Input Component */}
+                <MessageInput 
+                  onPublish={handlePublish}
+                  isSubmitting={isSubmitting}
                 />
-                
-                {/* Publish Button */}
-                <motion.button
-                  onClick={() => {
-                    const textarea = document.querySelector('textarea');
-                    const text = textarea?.value || '';
-                    if (text.trim()) {
-                      handlePublish(text);
-                      textarea.value = '';
-                    }
-                  }}
-                  className="w-full py-3 px-4 rounded-xl font-semibold text-white transition-all duration-200 mt-4"
-                  style={{
-                    background: 'linear-gradient(135deg, #64748b, #475569)',
-                    boxShadow: '0 4px 16px rgba(71, 85, 105, 0.3)'
-                  }}
-                  whileHover={{
-                    boxShadow: '0 6px 20px rgba(71, 85, 105, 0.4)'
-                  }}
-                >
-                  Publish Anonymously ✨
-                </motion.button>
               </motion.div>
             </>
           )}

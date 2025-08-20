@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 
-const MessageCard = ({ message, index, isScrolling }) => {
+const MessageCard = ({ message, index, isMobile }) => {
   // Consistent neutral color scheme for all cards
   const colorScheme = {
     bg: 'from-slate-200/95 via-slate-100/90 to-slate-50/85',
@@ -19,11 +19,11 @@ const MessageCard = ({ message, index, isScrolling }) => {
   const isLongMessage = message.text.length > 150;
   const isShortMessage = message.text.length < 50;
   
-  // Enhanced floating animation with cyber effects
+  // Enhanced floating animation with cyber effects - only on desktop
   const floatingAnimation = {
-    y: [0, -8, 0],
-    rotate: [baseRotation, baseRotation + 0.5, baseRotation],
-    scale: [1, 1.02, 1]
+    y: [0, -6, 0],
+    rotate: [baseRotation, baseRotation + 0.3, baseRotation],
+    scale: [1, 1.015, 1]
   };
   
   const formatTimestamp = (timestamp) => {
@@ -71,31 +71,37 @@ const MessageCard = ({ message, index, isScrolling }) => {
         rotate: baseRotation,
         y: 0
       }}
-      // Enhanced floating animation with cyber effects
-      whileInView={{
+      // Enhanced floating animation with cyber effects - only on desktop
+      whileInView={!isMobile ? {
         ...floatingAnimation,
         transition: {
-          duration: 6 + (index % 4) * 1,
+          duration: 4 + (index % 3) * 0.5,
           repeat: Infinity,
           ease: "easeInOut",
-          delay: (index % 5) * 0.5
+          delay: (index % 4) * 0.3
         }
-      }}
+      } : {}}
       transition={{ 
-        duration: 0.8, 
-        delay: index * 0.15,
+        duration: isMobile ? 0.4 : 0.8, 
+        delay: isMobile ? index * 0.05 : index * 0.15,
         type: "spring",
-        stiffness: 80,
-        damping: 20
+        stiffness: isMobile ? 100 : 80,
+        damping: isMobile ? 25 : 20
       }}
-      className={`bg-gradient-to-br ${colorScheme.bg} ${colorScheme.border} p-6 rounded-3xl transform transition-all duration-500 relative overflow-hidden group border backdrop-blur-sm`}
+      className={`bg-gradient-to-br ${colorScheme.bg} ${colorScheme.border} p-4 md:p-6 rounded-2xl md:rounded-3xl transform transition-all duration-500 relative overflow-hidden group border backdrop-blur-sm hover:shadow-xl hover:scale-[1.02]`}
       style={{
-        minHeight: isShortMessage ? '120px' : isLongMessage ? '220px' : '160px',
-        maxWidth: '340px',
+        minHeight: isShortMessage ? '100px' : isLongMessage ? '180px' : '140px',
+        maxWidth: isMobile ? '100%' : '320px',
+        width: '100%',
         wordBreak: 'break-word',
-        boxShadow: `0 4px 25px ${colorScheme.shadow}, 0 0 50px ${colorScheme.glow}20, inset 0 0 20px ${colorScheme.glow}10`,
-        opacity: 1, // Cards are always visible
-        transition: 'opacity 0.4s ease-in-out' // Smooth opacity transition
+        boxShadow: `0 4px 20px ${colorScheme.shadow}, 0 0 40px ${colorScheme.glow}15, inset 0 0 15px ${colorScheme.glow}08`,
+        opacity: 1,
+        transition: 'all 0.4s ease-in-out',
+        // Add subtle border glow on hover
+        borderColor: 'rgba(71, 85, 105, 0.3)',
+        // Ensure cards don't overlap
+        position: 'relative',
+        zIndex: 1
       }}
     >
       {/* Animated cyber border */}
@@ -116,42 +122,30 @@ const MessageCard = ({ message, index, isScrolling }) => {
       />
 
       {/* Futuristic background pattern */}
-      <motion.div
-        animate={{ 
-          rotate: 0,
-          scale: 1,
-          opacity: 0.08
-        }}
-        transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
-        className="absolute top-0 right-0 w-40 h-40 opacity-0 group-hover:opacity-100 transition-all duration-700"
-        style={{
-          background: `radial-gradient(circle at 30% 30%, ${colorScheme.pattern})`,
-          borderRadius: '50%'
-        }}
-      />
+      {!isMobile && (
+        <motion.div
+          animate={{ 
+            rotate: 0,
+            scale: 1,
+            opacity: 0.08
+          }}
+          transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
+          className="absolute top-0 right-0 w-40 h-40 opacity-0 group-hover:opacity-100 transition-all duration-700"
+          style={{
+            background: `radial-gradient(circle at 30% 30%, ${colorScheme.pattern})`,
+            borderRadius: '50%'
+          }}
+        />
+      )}
 
-      {/* Enhanced corner accent */}
-      <motion.div
-        animate={{ 
-          rotate: 0,
-          scale: 1,
-          opacity: 0.2
-        }}
-        transition={{ duration: 0.4 }}
-        className="absolute top-0 right-0 w-20 h-20 rounded-bl-3xl"
-        style={{
-          background: `linear-gradient(135deg, ${colorScheme.accent}40, transparent)`,
-          boxShadow: `inset 0 0 20px ${colorScheme.glow}`
-        }}
-      />
 
       {/* Message content with improved readability */}
       <div className="relative z-10">
         <motion.div 
-          className="text-slate-900 leading-relaxed font-semibold text-sm tracking-wide"
+          className="text-slate-900 leading-relaxed font-medium md:font-semibold text-sm md:text-base tracking-wide"
           style={{
             fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-            lineHeight: '1.7',
+            lineHeight: '1.6',
             textShadow: `0 0 1px rgba(0, 0, 0, 0.1)`
           }}
         >
@@ -160,22 +154,22 @@ const MessageCard = ({ message, index, isScrolling }) => {
         
         {/* Improved timestamp and metadata readability */}
         <motion.div 
-          className="mt-5 pt-4"
+          className="mt-4 md:mt-5 pt-3 md:pt-4"
           style={{
-            borderTop: `1px solid ${colorScheme.accent}30`
+            borderTop: `1px solid ${colorScheme.accent}25`
           }}
         >
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
               <motion.span 
-                className="text-lg"
+                className="text-base md:text-lg"
                 style={{
                   filter: `drop-shadow(0 0 3px ${colorScheme.glow})`
                 }}
               >
                 {getSecretiveEmoji()}
               </motion.span>
-              <span className="text-xs text-slate-700 font-semibold tracking-wide"
+              <span className="text-xs md:text-sm text-slate-700 font-medium md:font-semibold tracking-wide"
                     style={{
                       textShadow: `0 0 1px rgba(0, 0, 0, 0.1)`
                     }}>
@@ -183,9 +177,13 @@ const MessageCard = ({ message, index, isScrolling }) => {
               </span>
             </div>
             <motion.span 
-              className="text-xs font-bold tracking-wider opacity-100"
+              className="text-xs md:text-sm font-bold tracking-wider opacity-80 text-slate-600"
               style={{
-                textShadow: '0 0 1px rgba(0, 0, 0, 0.1)'
+                textShadow: '0 0 1px rgba(0, 0, 0, 0.1)',
+                background: 'rgba(71, 85, 105, 0.1)',
+                padding: '2px 6px',
+                borderRadius: '8px',
+                border: '1px solid rgba(71, 85, 105, 0.2)'
               }}
             >
               #{String(index + 1).padStart(3, '0')}
@@ -223,41 +221,42 @@ const MessageCard = ({ message, index, isScrolling }) => {
       {/* Enhanced hover effect overlay */}
       <motion.div
         initial={{ opacity: 0 }}
-        animate={{ opacity: 0 }}
-        className="absolute inset-0 rounded-3xl transition-opacity duration-500"
+        whileHover={{ opacity: 0.1 }}
+        className="absolute inset-0 rounded-2xl md:rounded-3xl transition-opacity duration-300"
         style={{
-          background: `linear-gradient(135deg, ${colorScheme.accent}15, transparent)`
+          background: `linear-gradient(135deg, ${colorScheme.accent}20, transparent)`,
+          pointerEvents: 'none'
         }}
       />
 
       {/* Futuristic bottom accent line */}
       <motion.div
         animate={{ 
-          scaleX: 0.7,
-          opacity: 0.3
+          scaleX: 0.8,
+          opacity: 0.4
         }}
         transition={{ duration: 0.4 }}
         className="absolute bottom-0 left-0 right-0 h-0.5 rounded-full"
         style={{
           background: `linear-gradient(90deg, transparent, ${colorScheme.accent}, transparent)`,
-          boxShadow: `0 0 6px ${colorScheme.glow}`
+          boxShadow: `0 0 8px ${colorScheme.glow}`
         }}
       />
 
       {/* Floating soft quote mark */}
       <motion.div
         animate={{ 
-          opacity: 0.12,
+          opacity: 0.15,
           y: 0,
           scale: 1
         }}
         transition={{ duration: 0.4 }}
-        className="absolute top-3 left-3 text-2xl font-serif"
+        className="absolute top-2 md:top-3 left-2 md:left-3 text-xl md:text-2xl font-serif"
         style={{ 
           fontFamily: 'Georgia, serif',
           color: colorScheme.accent,
-          textShadow: `0 0 6px ${colorScheme.glow}`,
-          filter: `drop-shadow(0 0 3px ${colorScheme.glow})`
+          textShadow: `0 0 8px ${colorScheme.glow}`,
+          filter: `drop-shadow(0 0 4px ${colorScheme.glow})`
         }}
       >
         "
